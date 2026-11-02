@@ -24,7 +24,18 @@ Iz direktorijuma aplikacije uspešno su izvršene sledeće provere:
 
 Offline instalacija prethodno nije uspela jer paket nije bio keširan (`ENOTCACHED`). Preuzimanje u sandboxu bilo je blokirano (`EACCES`); ponovljena instalacija sa odobrenim mrežnim pristupom uspela je. Npm keš je u privremenom direktorijumu, a `node_modules/` i `dist/` su ignorisani. Izvor, postojeći testovi, javni podaci, konfiguracija, lockfile i skripte nisu menjani.
 
-Sledeći je **korak 2: ručna provera shipping, refund, legacy i unknown odgovora**. Evaluacije još nisu pokrenute i nema početnih/završnih run dokaza. Brojevi evaluacije i regresije u planu ispod ostaju očekivanja, a ne ostvareni rezultati.
+**Korak 2 — provera CLI odgovora završen 2. novembra 2026.** Iz direktorijuma aplikacije izvršene su komande `npm.cmd start -- shipping`, `npm.cmd start -- refund`, `npm.cmd start -- legacy` i `npm.cmd start -- unknown`. Svaka je uspešno izgradila aplikaciju i završila kodom 0. Odgovori su upoređeni sa dokumentima i javnim kriterijumima u `data/lab.json`:
+
+| Tema | Stvarni odgovor i citat | Zaključak prema ugovoru |
+| --- | --- | --- |
+| `shipping` | `ok`; `Policy: Shipping takes 3 days.`; `shipping-current`, revizija 1 | Prihvatljivo: izvor je aktivan i odgovara temi. |
+| `refund` | `ok`; `Policy: Refund period: 30 days.`; `refund-old`, revizija 1 | Neprihvatljivo: izabrani izvor je arhiviran. Aktivan `refund-current`, revizija 2, zahteva odgovor `Policy: Refund period: 14 days.` i citat `refund-current`. |
+| `legacy` | `ok`; `Policy: Legacy service is available.`; `legacy-old`, revizija 1 | Neprihvatljivo: postoji samo arhivirani izvor. Potreban je `refused`, bez poziva modelu. |
+| `unknown` | `refused`; `Nema odgovarajućeg izvora.`; bez citata | Prihvatljivo: nema izvora za temu. Trag sadrži samo odgovor `refused`, bez modelskog događaja. |
+
+Za shipping, refund i legacy trag prikazuje izbor navedenog izvora, zatim `model: returned` i `response: ok`. Stanje izvora nije zapisano u tragu; provereno je u javnim podacima preko ID-ja i revizije. CLI kod 0 potvrđuje uspešno izvršavanje procesa, ali ne ocenjuje poslovnu ispravnost: refund i legacy krše ugovor uprkos uspešnom izvršavanju.
+
+Sledeći je **korak 3: početna evaluacija i regresiona provera, pre izmene aplikacije i dodavanja testa**. CLI pozivi ne prave `runs/`; evaluacije još nisu pokrenute i nema početnih/završnih run dokaza. Brojevi evaluacije i regresije u planu ispod ostaju očekivanja, a ne ostvareni rezultati.
 
 Za kontrolnu tačku pripreme oba člana treba da razumeju: uspešno pokretanje potvrđuje da se proces izvršio, prolaz tri osnovna testa potvrđuje samo njihove provere, dok se prihvatljivost odgovora proverava posebnim kriterijumima i evaluacijom. Tri prolaza nisu potvrda spremnosti za izdanje.
 
@@ -80,7 +91,7 @@ npm.cmd start -- unknown
 
 Ako je zaključani TypeScript već u npm kešu, instalacija može koristiti `--offline`. Neuspešna instalacija/build je problem pripreme; ne tumačiti ga kao očekivani poslovni propust.
 
-Početni commit startera je `4fde52c33237ff800510fc57bbd0ee14d5ddd46f` (`project init`). Proverite `git status --short` i `git diff --cached` pre narednog commita. Završni commit zabeležite nakon korekcije. Dokumentacione izmene i uklanjanje kursnih materijala iz praćenja još nisu commitovani.
+Početni commit startera je `4fde52c33237ff800510fc57bbd0ee14d5ddd46f` (`project init`). Priprema i prethodne dokumentacione izmene sačuvane su u commitu `80267a7` (`Step 1`). Proverite `git status --short` i `git diff --cached` pre narednog commita. Završni commit zabeležite nakon korekcije aplikacije.
 
 Početna merenja izvršite pre dodavanja novog testa i promene aplikacije:
 
