@@ -46,7 +46,7 @@ U oba skupa padaju `refund` (tekst i citat) i `legacy` (status i broj poziva mod
 
 Provereno je da oba direktorijuma sadrže `report.json`, `summary.md` i sve pripadajuće tragove (4 za evaluaciju, 7 za regresiju), i da se izdvojeni tragovi podudaraju sa tragovima u izveštajima. Oba merenja beleže commit `138d162118906c7516e2bc27f6bdef0a5b40daa4` (`Step 2`), sa čistim Git stanjem u trenutku izvršavanja. Otisci izvora, build-a, podataka, skripti, testova, alata i konfiguracija podudaraju se između ova dva merenja. Aplikacioni fajlovi i dalje odgovaraju početnom starteru.
 
-Ova dva direktorijuma dokaza dodata su u Git indeks uprkos opštem ignorisanju `runs/`, za čuvanje kroz sledeći commit. Ne prepisivati niti brisati početne izveštaje. Završna merenja još nisu izvršena; 4/4 i 7/7 ostaju očekivanja za kasniju korekciju.
+Ova dva direktorijuma dokaza sačuvana su u commitu `f6b48e1` (`Step 3`), uprkos opštem ignorisanju `runs/`. Ne prepisivati niti brisati početne izveštaje. Završna merenja još nisu izvršena; 4/4 i 7/7 ostaju očekivanja za kasniju korekciju.
 
 Za nastavak u novom PowerShell terminalu, iz direktorijuma aplikacije, početne putanje možete ponovo postaviti ovako:
 
@@ -55,7 +55,16 @@ $preEval = 'runs/evaluate-661dd773-f065-4c0e-b998-2e7b39a2614d'
 $preReg = 'runs/regression-18f208fa-086a-4bcc-b02f-5cd089fd3469'
 ```
 
-Sledeći je **korak 4: detaljna istraga sačuvanog refund rezultata, traga i uverljivosti ocene**. Za sada nema korekcije aplikacije ni novog testa.
+**Korak 4 — istraga početnog rezultata završena 2. novembra 2026.** Pregledani su sažetak, stavka `results` sa `id: refund` u početnom izveštaju, izdvojeni trag, javni podaci, policy grana i evaluator. Ovo je analiza već sačuvanog izvršavanja, bez novog evaluacionog pokretanja.
+
+- **Opažanje:** zahtev je `{ "kind": "policy", "topic": "refund" }`. Odgovor je `ok`, navodi 30 dana i citira `refund-old`. Trag pokazuje izbor `refund-old`, reviziju 1, zatim vraćen modelski odgovor i status `ok`; izveštaj beleži `modelCalls: 1` i `lookupCalls: 0`. Provera statusa prolazi, ali provere teksta i citata padaju, pa je `passed: false`.
+- **Veza sa ugovorom:** u tragu nema `state`; ID i revizija povezani su sa `data/lab.json`, gde je taj dokument arhiviran. Aktivan `refund-current`, revizija 2, iste teme propisuje 14 dana. Citat potvrđuje koji izvor je upotrebljen, ali prisustvo citata ne potvrđuje da je taj izvor prihvatljiv.
+- **Uzrok potkrepljen kodom i hipoteza korekcije:** `src/app.ts`, linija 57, koristi `find(document => document.topic === request.topic)` i bira prvi dokument iste teme bez uslova za `state`. Arhivirani refund dokument je prvi u nizu. Trag sam ne objašnjava algoritam; tek povezivanje sa kodom objašnjava ovaj izbor. Kontrolisana modelska funkcija u `scripts/evidence.mjs` samo dodaje `Policy: ` tekstu izabranog dokumenta. Podaci zato podržavaju propust izbora izvora; nema osnova da ga pripišemo halucinaciji živog modela ili promptu. Hipoteza je da izbor aktivnog izvora iste teme, uz odbijanje kada takvog izvora nema, rešava refund i legacy. Efekat korekcije tek treba dokazati testom i poređenjem.
+- **Kritika ocene:** `weakCheck: true` znači samo da odgovor nije prazan (`actual.text.length > 0`); ta provera ne meri važenje izvora, rok ni ispravnost citata. `recordedJudge.score: 0.95` sa obrazloženjem `Fluent and specific answer.` preuzet je iz javnog JSON-a prema tekstu odgovora. Poreklo `authored-synthetic-example-not-a-real-model-run` označava autorsku ilustraciju. Ispravan odgovor u istim podacima ima ilustrativnu ocenu 0.92. Ove ocene ne podržavaju naš kriterijum prihvatanja i nisu merenje pristrasnosti stvarnog modela; dokaz protiv prihvatanja su arhivirano stanje izvora, pogrešan rok i pali kriterijumi.
+
+Na vrhu izveštaja `runId` i `createdAt` identifikuju izvršavanje, `node` okruženje, a `git` commit i tadašnje stanje radne kopije. `source`, `built`, `data`, `scripts`, `tests` i `toolchain` sadrže otiske fajlova; `config` beleži postavke simulacije. U ovom koraku svih 11 zabeleženih otisaka provereno je prema sadašnjim fajlovima, uz podudaranje konfiguracije i refund traga sa `actual.trace`. Polje `trace` u rezultatu je relativna putanja do izdvojenog traga. Otisci identifikuju sadržaj, ali nisu dokaz ispravnosti niti zaštita od proizvoljnog menjanja svih dokaza.
+
+Posle korekcije očekuju se promenjeni izvor, build i skup testova, kao i novi ID i vreme izvršavanja. Javni podaci, konfiguracija, evaluator i alati ostaju isti radi kontrolisanog poređenja. Detaljno tumačenje sa referencama uneto je u [belešku para](evidence-template.md). Sledeći je **korak 5: mali opis promene i kriterijumi prihvatanja pre implementacije**.
 
 Za kontrolnu tačku pripreme oba člana treba da razumeju: uspešno pokretanje potvrđuje da se proces izvršio, prolaz tri osnovna testa potvrđuje samo njihove provere, dok se prihvatljivost odgovora proverava posebnim kriterijumima i evaluacijom. Tri prolaza nisu potvrda spremnosti za izdanje.
 
