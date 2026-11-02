@@ -7,15 +7,15 @@ Priložite automatske `report.json`, `summary.md` i direktorijume tragova. Ne pr
 ## Promena i hipoteza
 
 - Članovi para i ko ove nedelje vodi prikaz:
-- Polazni/završni commit i putanje generisanih početnih/završnih izveštaja: polazni `4fde52c33237ff800510fc57bbd0ee14d5ddd46f` (`project init`). Završni commit i evaluacioni izveštaji još ne postoje. Korak 1 završen 2. novembra 2026: instalacija i typecheck uspešni, 3/3 osnovna testa prolaze. Detalji pripreme su u README-u; aplikacioni fajlovi odgovaraju polaznom commitu.
-- Koji problem smo opazili, koji trag ga podržava i zašto smo očekivali da ova izmena pomogne: u koraku 2 CLI je za refund vratio 30 dana i citat `refund-old`; trag navodi taj izvor, reviziju 1, i uspešan poziv modelu. `data/lab.json` potvrđuje da je izvor arhiviran, dok aktivni `refund-current`, revizija 2, navodi 14 dana. Legacy takođe koristi arhivirani izvor umesto da odbije zahtev. Hipoteza iz pregleda koda je da provera aktivnog stanja pri izboru izvora rešava oba propusta; korekcija još nije sprovedena niti potvrđena evaluacijom. CLI opažanja su zabeležena u README-u; sačuvani evaluacioni tragovi slede u koraku 3.
+- Polazni/završni commit i putanje generisanih početnih/završnih izveštaja: starter `4fde52c33237ff800510fc57bbd0ee14d5ddd46f` (`project init`); početna merenja izvršena na commitu `138d162118906c7516e2bc27f6bdef0a5b40daa4` (`Step 2`), uz čisto Git stanje i isti aplikacioni sadržaj. Sačuvani su [početna evaluacija](support-reliability-lab/runs/evaluate-661dd773-f065-4c0e-b998-2e7b39a2614d/report.json) i [početna regresija](support-reliability-lab/runs/regression-18f208fa-086a-4bcc-b02f-5cd089fd3469/report.json), sa sažecima i tragovima u istim direktorijumima. Završni commit korekcije i završna merenja još ne postoje. Detalji pripreme i početnih merenja su u README-u.
+- Koji problem smo opazili, koji trag ga podržava i zašto smo očekivali da ova izmena pomogne: u koraku 2 CLI je za refund vratio 30 dana i citat `refund-old`; isti izbor potvrđuje [početni refund trag](support-reliability-lab/runs/evaluate-661dd773-f065-4c0e-b998-2e7b39a2614d/traces/refund.json), sa revizijom 1 i uspešnim pozivom modelu. `data/lab.json` potvrđuje da je izvor arhiviran, dok aktivni `refund-current`, revizija 2, navodi 14 dana. Legacy takođe koristi arhivirani izvor umesto da odbije zahtev. Hipoteza iz pregleda koda je da provera aktivnog stanja pri izboru izvora rešava oba propusta; korekcija još nije sprovedena niti potvrđena završnom evaluacijom.
 - Granica izmene i dodatna regresiona provera:
 - Ime dodatnog testa, zašto je pao pre izmene i prošao posle; reference na `test-before.txt` / `test-after.txt`:
 
 ## Tumačenje, ne prepisivanje
 
 - Koji konkretni slučaj se promenio i koji dokaz to pokazuje:
-- Šta kaže ceo regresioni skup; ima li pogoršanja ili neizvršene provere:
+- Šta kaže ceo regresioni skup; ima li pogoršanja ili neizvršene provere: početni regresioni skup potvrđuje oba policy propusta, uz prolaz ostalih policy provera, poznatih naloga i neispravnog zahteva. Oba početna skupa izvršena su u celosti. Još nema završnog merenja, pa ne tvrdimo poboljšanje niti odsustvo novih regresija. Nepoznat nalog nije obuhvaćen ovim javnim skupom.
 - Sa kojom slabom/modelskom ocenom se slažemo ili ne slažemo i zašto:
 - Šta Codex-ov kod/test/objašnjenje nije mogao nezavisno da potvrdi i kako smo proverili pretpostavku:
 
@@ -29,7 +29,7 @@ Priložite automatske `report.json`, `summary.md` i direktorijume tragova. Ne pr
 
 Radimo naizmenično prema dostupnosti. Na kraju doprinos unosimo na osnovu sadržaja commitova i usmenog dogovora, uključujući analizu, pregled i lično proverene rezultate.
 
-- Za šta smo koristili Codex, šta prihvatili/izmenili/odbacili i kako proverili: do sada za plan i dokumentaciju, pripremu okruženja, typecheck, tri osnovna testa i izvršavanje četiri CLI primera u koraku 2. Codex je odgovore i tragove uporedio sa stanjem izvora i javnim kriterijumima u `data/lab.json`: shipping i unknown zadovoljavaju ugovor, refund i legacy ga krše, iako su sve četiri komande završile kodom 0. Nema prihvaćene korekcije aplikacije niti evaluacionih dokaza. Lične provere članova i konačan doprinos dopuniti prema commitovima i usmenom dogovoru.
+- Za šta smo koristili Codex, šta prihvatili/izmenili/odbacili i kako proverili: do sada za plan, dokumentaciju, pripremu okruženja, osnovne testove, četiri CLI primera i oba početna merenja. Codex je proverio rezultate prema javnim kriterijumima, postojanje izveštaja i svih tragova, kao i podudaranje metapodataka uslova merenja. Evaluacione komande stvarno su izvršene; njihov kod 1 prati konkretne propuste u izveštajima. Nema prihvaćene korekcije aplikacije. Lične provere članova i konačan doprinos dopuniti prema commitovima i usmenom dogovoru.
 - Član 1: konkretan doprinos i lično proveren rezultat:
 - Član 2: konkretan doprinos i lično proveren rezultat:
 

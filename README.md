@@ -35,7 +35,27 @@ Offline instalacija prethodno nije uspela jer paket nije bio keširan (`ENOTCACH
 
 Za shipping, refund i legacy trag prikazuje izbor navedenog izvora, zatim `model: returned` i `response: ok`. Stanje izvora nije zapisano u tragu; provereno je u javnim podacima preko ID-ja i revizije. CLI kod 0 potvrđuje uspešno izvršavanje procesa, ali ne ocenjuje poslovnu ispravnost: refund i legacy krše ugovor uprkos uspešnom izvršavanju.
 
-Sledeći je **korak 3: početna evaluacija i regresiona provera, pre izmene aplikacije i dodavanja testa**. CLI pozivi ne prave `runs/`; evaluacije još nisu pokrenute i nema početnih/završnih run dokaza. Brojevi evaluacije i regresije u planu ispod ostaju očekivanja, a ne ostvareni rezultati.
+**Korak 3 — početna merenja završena 2. novembra 2026.** Pre izmene aplikacije i dodavanja testa izvršene su obe komande:
+
+| Merenje | Stvarni rezultat | Sačuvani izveštaj |
+| --- | --- | --- |
+| `npm.cmd run evaluate` | 2/4; izlazni kod 1 | [Početna evaluacija](support-reliability-lab/runs/evaluate-661dd773-f065-4c0e-b998-2e7b39a2614d/report.json) |
+| `npm.cmd run regression` | 5/7; izlazni kod 1 | [Početna regresija](support-reliability-lab/runs/regression-18f208fa-086a-4bcc-b02f-5cd089fd3469/report.json) |
+
+U oba skupa padaju `refund` (tekst i citat) i `legacy` (status i broj poziva modelu). `shipping` i `unsupported` prolaze; u regresionom skupu prolaze i `active-account`, `suspended-account` i `invalid`. Kod 1 ovde označava stvarne neuspešne kriterijume, uz uspešan build i generisane izveštaje.
+
+Provereno je da oba direktorijuma sadrže `report.json`, `summary.md` i sve pripadajuće tragove (4 za evaluaciju, 7 za regresiju), i da se izdvojeni tragovi podudaraju sa tragovima u izveštajima. Oba merenja beleže commit `138d162118906c7516e2bc27f6bdef0a5b40daa4` (`Step 2`), sa čistim Git stanjem u trenutku izvršavanja. Otisci izvora, build-a, podataka, skripti, testova, alata i konfiguracija podudaraju se između ova dva merenja. Aplikacioni fajlovi i dalje odgovaraju početnom starteru.
+
+Ova dva direktorijuma dokaza dodata su u Git indeks uprkos opštem ignorisanju `runs/`, za čuvanje kroz sledeći commit. Ne prepisivati niti brisati početne izveštaje. Završna merenja još nisu izvršena; 4/4 i 7/7 ostaju očekivanja za kasniju korekciju.
+
+Za nastavak u novom PowerShell terminalu, iz direktorijuma aplikacije, početne putanje možete ponovo postaviti ovako:
+
+```powershell
+$preEval = 'runs/evaluate-661dd773-f065-4c0e-b998-2e7b39a2614d'
+$preReg = 'runs/regression-18f208fa-086a-4bcc-b02f-5cd089fd3469'
+```
+
+Sledeći je **korak 4: detaljna istraga sačuvanog refund rezultata, traga i uverljivosti ocene**. Za sada nema korekcije aplikacije ni novog testa.
 
 Za kontrolnu tačku pripreme oba člana treba da razumeju: uspešno pokretanje potvrđuje da se proces izvršio, prolaz tri osnovna testa potvrđuje samo njihove provere, dok se prihvatljivost odgovora proverava posebnim kriterijumima i evaluacijom. Tri prolaza nisu potvrda spremnosti za izdanje.
 
