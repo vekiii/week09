@@ -20,3 +20,7 @@ Desktop.ini
 # support-reliability-lab/.gitignore already ignores runs/ and *.zip.
 # To submit evidence via Git, explicitly add the four selected run directories
 # with git add -f, as described in README.md.
+
+# Course materials kept locally; repository contains the solution
+/weekly-assignment.md
+/nedelja-09-prethodno-citanje.pdf

@@ -7,7 +7,7 @@ Priložite automatske `report.json`, `summary.md` i direktorijume tragova. Ne pr
 ## Promena i hipoteza
 
 - Članovi para i ko ove nedelje vodi prikaz:
-- Polazni/završni commit i putanje generisanih početnih/završnih izveštaja:
+- Polazni/završni commit i putanje generisanih početnih/završnih izveštaja: polazni `4fde52c33237ff800510fc57bbd0ee14d5ddd46f` (`project init`). Završni commit i evaluacioni izveštaji još ne postoje. Korak 1 završen 2. novembra 2026: instalacija i typecheck uspešni, 3/3 osnovna testa prolaze. Detalji pripreme su u README-u; aplikacioni fajlovi odgovaraju polaznom commitu.
 - Koji problem smo opazili, koji trag ga podržava i zašto smo očekivali da ova izmena pomogne:
 - Granica izmene i dodatna regresiona provera:
 - Ime dodatnog testa, zašto je pao pre izmene i prošao posle; reference na `test-before.txt` / `test-after.txt`:
@@ -27,7 +27,9 @@ Priložite automatske `report.json`, `summary.md` i direktorijume tragova. Ne pr
 
 ## AI pomoć i pojedinačni doprinos
 
-- Za šta smo koristili Codex, šta prihvatili/izmenili/odbacili i kako proverili:
+Radimo naizmenično prema dostupnosti. Na kraju doprinos unosimo na osnovu sadržaja commitova i usmenog dogovora, uključujući analizu, pregled i lično proverene rezultate.
+
+- Za šta smo koristili Codex, šta prihvatili/izmenili/odbacili i kako proverili: do sada za plan i dokumentaciju, proveru okruženja, instalaciju zaključanih zavisnosti i izvršavanje typecheck-a i tri osnovna testa. Komande su stvarno izvršene i vratile uspešan izlazni kod; nema prihvaćene korekcije aplikacije niti evaluacionih dokaza. Lične provere članova i konačan doprinos dopuniti prema commitovima i usmenom dogovoru.
 - Član 1: konkretan doprinos i lično proveren rezultat:
 - Član 2: konkretan doprinos i lično proveren rezultat:
 
