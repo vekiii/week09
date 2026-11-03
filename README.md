@@ -44,9 +44,9 @@ Za shipping, refund i legacy trag prikazuje izbor navedenog izvora, zatim `model
 
 U oba skupa padaju `refund` (tekst i citat) i `legacy` (status i broj poziva modelu). `shipping` i `unsupported` prolaze; u regresionom skupu prolaze i `active-account`, `suspended-account` i `invalid`. Kod 1 ovde označava stvarne neuspešne kriterijume, uz uspešan build i generisane izveštaje.
 
-Provereno je da oba direktorijuma sadrže `report.json`, `summary.md` i sve pripadajuće tragove (4 za evaluaciju, 7 za regresiju), i da se izdvojeni tragovi podudaraju sa tragovima u izveštajima. Oba merenja beleže commit `138d162118906c7516e2bc27f6bdef0a5b40daa4` (`Step 2`), sa čistim Git stanjem u trenutku izvršavanja. Otisci izvora, build-a, podataka, skripti, testova, alata i konfiguracija podudaraju se između ova dva merenja. Aplikacioni fajlovi i dalje odgovaraju početnom starteru.
+Provereno je da oba direktorijuma sadrže `report.json`, `summary.md` i sve pripadajuće tragove (4 za evaluaciju, 7 za regresiju), i da se izdvojeni tragovi podudaraju sa tragovima u izveštajima. Oba merenja beleže commit `138d162118906c7516e2bc27f6bdef0a5b40daa4` (`Step 2`), sa čistim Git stanjem u trenutku izvršavanja. Otisci izvora, build-a, podataka, skripti, testova, alata i konfiguracija podudaraju se između ova dva merenja. U tom trenutku aplikacioni fajlovi odgovarali su početnom starteru.
 
-Ova dva direktorijuma dokaza sačuvana su u commitu `f6b48e1` (`Step 3`), uprkos opštem ignorisanju `runs/`. Ne prepisivati niti brisati početne izveštaje. Završna merenja još nisu izvršena; 4/4 i 7/7 ostaju očekivanja za kasniju korekciju.
+Ova dva direktorijuma dokaza sačuvana su u commitu `f6b48e1` (`Step 3`), uprkos opštem ignorisanju `runs/`. Ne prepisivati niti brisati početne izveštaje. Na kraju koraka 3 završna merenja još nisu bila izvršena; 4/4 i 7/7 tada su bili očekivanja za kasniju korekciju.
 
 Za nastavak u novom PowerShell terminalu, iz direktorijuma aplikacije, početne putanje možete ponovo postaviti ovako:
 
@@ -86,13 +86,35 @@ Provere su izvršene ovim redom iz direktorijuma aplikacije:
 
 Prvi stvarni pad bio je tekst od 60 umesto 21 dana; drugi jedan modelski poziv umesto nule. Nakon sačuvanog pada, u `src/app.ts` dodat je samo uslov `document.state === "active"` uz postojeću proveru teme. Postojeća grana za nedostajući izvor sada odbija i temu sa samo arhiviranim dokumentima. Novi test nije menjan između pada i prolaza, što je provereno SHA-256 otiskom; ne zavisi od refund primera i posebno proverava citat, pa sama zamena teksta nije dovoljna.
 
-Pregledani su diff i ceo novi test. Postojeći testovi, javni podaci, konfiguracija, skripte, evaluator, account putanja i početni dokazi nisu menjani; `dist/` je nastao build-om. README i beleška ažurirani su zajedno sa kodom i testnim izlazima. Završni commit korekcije još treba da napravi korisnik. **Korak 7 nije započet:** nisu pokretani `evaluate`, `regression` ili `compare`, pa 4/4 i 7/7 još nisu potvrđeni. Usklađivanje završetaka redova za kontrolisano javno poređenje ostaje priprema za taj korak; u koraku 6 javni podaci i skripte nisu prepisivani.
+Pregledani su diff i ceo novi test. Postojeći testovi, javni podaci, konfiguracija, skripte, evaluator, account putanja i početni dokazi nisu menjani; `dist/` je nastao build-om. README i beleška ažurirani su zajedno sa kodom i testnim izlazima. Korekcija i dokazi dodatnog testa sačuvani su u commitu `209f851` (`Step 6`). Na kraju tog koraka `evaluate`, `regression` i `compare` još nisu bili pokrenuti; usklađivanje završetaka redova ostavljeno je za korak 7.
+
+**Korak 7 — javna merenja i kontrolisana poređenja završeni 3. novembra 2026.** Pre merenja devet merenih fajlova vraćeno je sa `CRLF` na `LF`: osam neizmenjenih ulaza provereno je prema početnim otiscima, a `src/app.ts` prema Git sadržaju commita `209f851`. Time su vraćeni početni bajtovi podataka, skripti, postojećeg testa i konfiguracije, bez promene njihovog sadržaja ili ponašanja aplikacije. Novi [.gitattributes](support-reliability-lab/.gitattributes) čuva `LF` za merene ulaze pri budućim checkout-ima. Evaluator i njegova zaštita poređenja nisu menjani.
+
+| Izvršena provera | Stvarni rezultat | Dokaz |
+| --- | --- | --- |
+| `npm.cmd run evaluate` | 4/4; izlazni kod 0 | [Završna evaluacija](support-reliability-lab/runs/evaluate-4042eff9-4b82-41ea-bb6f-e32e9072896b/report.json) |
+| `npm.cmd run regression` | 7/7; izlazni kod 0 | [Završna regresija](support-reliability-lab/runs/regression-5de5e837-6ca1-4dc4-aa81-1cdd30996e57/report.json) |
+| `compare`: početna i završna evaluacija | 2/4 → 4/4; izlazni kod 0 | Isti evaluate skup i neizmenjeni uslovi. |
+| `compare`: početna i završna regresija | 5/7 → 7/7; izlazni kod 0 | Isti regression skup i neizmenjeni uslovi. |
+
+Oba poređenja prikazuju `refund: FAIL -> PASS` i `legacy: FAIL -> PASS`. `shipping` i `unsupported` ostaju PASS; u regresionom skupu ostaju PASS i `active-account`, `suspended-account` i `invalid`. Završni [refund trag](support-reliability-lab/runs/evaluate-4042eff9-4b82-41ea-bb6f-e32e9072896b/traces/refund.json) navodi `refund-current`, reviziju 2; odgovor glasi `Policy: Refund period: 14 days.` i citira samo taj izvor. Za [legacy](support-reliability-lab/runs/evaluate-4042eff9-4b82-41ea-bb6f-e32e9072896b/traces/legacy.json) oba završna izveštaja potvrđuju `refused`, prazan citat i `modelCalls: 0`, bez modelskog događaja u tragu.
+
+Svaki završni direktorijum sadrži `report.json`, `summary.md` i sve pripadajuće tragove; svih 11 izdvojenih tragova podudara se sa `actual.trace`. U svakom izveštaju provereno je svih 12 otisaka prema izvršenim fajlovima. Podaci, konfiguracija simulacije, skripte, alatni lanac i identiteti slučajeva isti su pre/posle; razlikuju se izmenjeni izvor, izvršivi build i prošireni skup testova. Oba završna merenja beleže commit `209f8519eb5e0c19e01ac84ec7f7bf303d96cdc1`, sa `git.dirty: true` zbog pripreme `LF` u radnoj kopiji i novog, nekomitovanog `.gitattributes`. Taj metapodatak nije prepravljan u izveštajima.
+
+Početni dokazi, `test-before.txt`, `test-after.txt` i dodatni test sačuvani su bez izmene. Dva nova direktorijuma ostaju ignorisana pravilom za `runs/`; tačne komande za ručno dodavanje nalaze se na kraju ovog README-a. Dodatna funkcionalna izmena aplikacije nije bila potrebna. Nema pogoršanja u izvršenom javnom skupu; 7/7 ne obuhvata nepoznat nalog niti meri pouzdanost živog modela. **Sledeći je korak 8: preporuka, ograničenja i priprema predaje; nije započet.**
+
+Za nastavak u novom terminalu iz direktorijuma aplikacije, bez ponovnog generisanja dokaza:
+
+```powershell
+$postEval = 'runs/evaluate-4042eff9-4b82-41ea-bb6f-e32e9072896b'
+$postReg = 'runs/regression-5de5e837-6ca1-4dc4-aa81-1cdd30996e57'
+```
 
 Za kontrolnu tačku pripreme oba člana treba da razumeju: uspešno pokretanje potvrđuje da se proces izvršio, prolaz tri osnovna testa potvrđuje samo njihove provere, dok se prihvatljivost odgovora proverava posebnim kriterijumima i evaluacijom. Tri prolaza nisu potvrda spremnosti za izdanje.
 
 ## Granica promene i hipoteza
 
-Polazni `answer()` birao je prvi dokument iste teme pomoću `find`, bez provere `state`. U javnim podacima arhivirani `refund-old` prethodi aktivnom `refund-current`. U koraku 6 izbor je ograničen na aktivan dokument odgovarajuće teme. Dodatni test potvrđuje to pravilo i odbijanje bez modela na sopstvenim podacima; očekivani efekat na refund i legacy još treba potvrditi ponovljenim javnim merenjima i tragovima u koraku 7.
+Polazni `answer()` birao je prvi dokument iste teme pomoću `find`, bez provere `state`. U javnim podacima arhivirani `refund-old` prethodi aktivnom `refund-current`. U koraku 6 izbor je ograničen na aktivan dokument odgovarajuće teme. Dodatni test potvrđuje to pravilo i odbijanje bez modela na sopstvenim podacima; ponovljena javna merenja i tragovi u koraku 7 potvrđuju korekciju refund i legacy uz očuvane prolaze ostalih javnih slučajeva.
 
 Kriterijumi prihvatanja:
 
@@ -180,7 +202,7 @@ node --test --test-reporter=tap tests/source-eligibility.test.mjs > test-after.t
 Get-Content test-after.txt
 ```
 
-Nakon uspešnih provera generišite završne dokaze:
+Naredne komande koraka 7 takođe su referenca izvršenog postupka. Završni dokazi već postoje na gore navedenim putanjama; za njihov pregled nije potrebno novo pokretanje:
 
 ```powershell
 $postEvalLog = @(npm.cmd run evaluate)
@@ -212,12 +234,20 @@ Predlog signala za simulaciju: proveravati svaki policy citat prema sačuvanom k
 ## Kontrolna lista predaje
 
 - [x] Izmenjeni `src/app.ts` i novi `tests/source-eligibility.test.mjs`.
-- [ ] Početni i završni commit, ili tačno objašnjenje nedostajućih metapodataka.
-- [ ] Četiri stvarna run direktorijuma: pre/posle za evaluate i regression, svaki sa izveštajem, sažetkom i tragovima.
+- [x] Početni i završni commit aplikacione korekcije: `4fde52c` i `209f851`; metapodaci merenja objašnjeni iznad.
+- [x] Četiri stvarna run direktorijuma: pre/posle za evaluate i regression, svaki sa izveštajem, sažetkom i tragovima; završna dva još treba ručno dodati u Git.
 - [x] `test-before.txt` i `test-after.txt` za isti dodatni test.
 - [ ] Popunjen `evidence-template.md`, sa putanjama dokaza, tumačenjem, AI pomoći, doprinosom oba člana, preporukom i signalom.
 - [ ] Proveren sadržaj predaje: bez `node_modules/`, generisanog `dist/`, tajni i stvarnih korisničkih podataka.
 
-Ugnježdeni `.gitignore` već isključuje `support-reliability-lab/runs/` i ZIP arhive. Root `.gitignore` čuva ta pravila i ostavlja test-before/test-after izlaze dostupnim za Git. Ako dokaze predajete kroz Git, iz direktorijuma aplikacije dodajte **samo četiri izabrana direktorijuma** komandom `git add -f -- runs/STVARNO-IME` za svaki, pa proverite staged sadržaj. Alternativno ih predajte zasebnim arhivom potvrđenim kanalom. Sam commit koda nije zamena za dokaze.
+Ugnježdeni `.gitignore` i dalje isključuje `support-reliability-lab/runs/` i ZIP arhive. Početna dva direktorijuma već su u Gitu, sačuvana u commitu `f6b48e1`. Za ovaj korak ručno dodajte **samo dva nova direktorijuma**, zajedno sa svim njihovim fajlovima. Iz direktorijuma `week09`:
+
+```powershell
+git add -f -- support-reliability-lab/runs/evaluate-4042eff9-4b82-41ea-bb6f-e32e9072896b
+git add -f -- support-reliability-lab/runs/regression-5de5e837-6ca1-4dc4-aa81-1cdd30996e57
+git diff --cached --stat
+```
+
+Ne dodavati druge lokalne run direktorijume. README, belešku i novi `.gitattributes` dodajte uobičajeno; commit i push pravi korisnik. Alternativno dokaze predajte zasebnim arhivom potvrđenim kanalom. Sam commit koda nije zamena za dokaze.
 
 Pre predaje dogovorite ko ove nedelje vodi prikaz i potvrdite rok i kanal predaje u kursu; zadatak ne navodi konkretan termin. U sredu dopunite istu belešku tutorovom nezavisnom proverom, incidentom i revidiranom preporukom, bez obaveznog novog programiranja.

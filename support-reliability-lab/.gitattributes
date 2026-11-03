@@ -1,0 +1,8 @@
+# Preserve LF bytes used by the reference evidence on every checkout.
+src/** text eol=lf
+tests/** text eol=lf
+data/** text eol=lf
+scripts/** text eol=lf
+package.json text eol=lf
+package-lock.json text eol=lf
+tsconfig.json text eol=lf
