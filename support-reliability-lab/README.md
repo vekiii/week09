@@ -17,7 +17,9 @@ npm run regression
 
 `npm ci` prvi put preuzima zaključani TypeScript paket; kada je paket već u npm kešu, dodajte `--offline`. Izvođenje aplikacije ne koristi mrežu. Ako instalacija nije dostupna, obratite se kursnoj zajednici za pripremljeni paket/zavisnost; ne preskačite typecheck niti izmišljajte rezultate.
 
-Početni `evaluate` namerno završava kodom 1 sa 2/4 prolaza; `regression` ima 5/7. `npm test` ima tri osnovne provere i nije zamena za evaluaciju. Pokrenite sve provere i kada jedna otkrije problem.
+U početnom starteru `evaluate` je namerno završavao kodom 1 sa 2/4 prolaza, `regression` je imao 5/7, a `npm test` tri osnovne provere. Posle korekcije izbora aktivnog policy izvora potvrđeni su 4/4 i 7/7, uz pet testova (tri postojeća i dva nova). Testovi nisu zamena za evaluaciju. Stvarni sačuvani dokazi i postupak opisani su u [projektnom README-u](../README.md).
+
+Preporuka za ceo servis, uključujući account zahteve, ostaje **ne izdati** zbog poznatog propusta nepoznatog naloga koji javnih 7/7 ne obuhvata. Obrazloženje, granice simulacije i predlog signala za praćenje nalaze se u [belešci para](../evidence-template.md#preporuka-i-ograničenja).
 
 ## Dokazi bez prepisivanja
 

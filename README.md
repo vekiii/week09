@@ -1,6 +1,6 @@
 # Week09 — pouzdanost servisa korisničke podrške
 
-Rad u paru: **ti i Milan**. Cilj je jedna istražena korekcija izbora izvora u `policy` putanji, uz stvarne dokaze pre/posle i obrazloženu preporuku za simuliranu upotrebu. Planirano trajanje je **220 minuta rada para** (oko 3 h 40 min, uključujući čitanje), naizmenično prema dostupnosti.
+Rad u paru: **Vedran (Veki) i Milan**; **prikaz vodi Milan**. Cilj je jedna istražena korekcija izbora izvora u `policy` putanji, uz stvarne dokaze pre/posle i obrazloženu preporuku za simuliranu upotrebu. Planirano trajanje je **220 minuta rada para** (oko 3 h 40 min, uključujući čitanje), naizmenično prema dostupnosti.
 
 ## Materijali i trenutno stanje
 
@@ -59,7 +59,7 @@ $preReg = 'runs/regression-18f208fa-086a-4bcc-b02f-5cd089fd3469'
 
 - **Opažanje:** zahtev je `{ "kind": "policy", "topic": "refund" }`. Odgovor je `ok`, navodi 30 dana i citira `refund-old`. Trag pokazuje izbor `refund-old`, reviziju 1, zatim vraćen modelski odgovor i status `ok`; izveštaj beleži `modelCalls: 1` i `lookupCalls: 0`. Provera statusa prolazi, ali provere teksta i citata padaju, pa je `passed: false`.
 - **Veza sa ugovorom:** u tragu nema `state`; ID i revizija povezani su sa `data/lab.json`, gde je taj dokument arhiviran. Aktivan `refund-current`, revizija 2, iste teme propisuje 14 dana. Citat potvrđuje koji izvor je upotrebljen, ali prisustvo citata ne potvrđuje da je taj izvor prihvatljiv.
-- **Uzrok potkrepljen kodom i hipoteza korekcije:** `src/app.ts`, linija 57, koristi `find(document => document.topic === request.topic)` i bira prvi dokument iste teme bez uslova za `state`. Arhivirani refund dokument je prvi u nizu. Trag sam ne objašnjava algoritam; tek povezivanje sa kodom objašnjava ovaj izbor. Kontrolisana modelska funkcija u `scripts/evidence.mjs` samo dodaje `Policy: ` tekstu izabranog dokumenta. Podaci zato podržavaju propust izbora izvora; nema osnova da ga pripišemo halucinaciji živog modela ili promptu. Hipoteza je da izbor aktivnog izvora iste teme, uz odbijanje kada takvog izvora nema, rešava refund i legacy. Efekat korekcije tek treba dokazati testom i poređenjem.
+- **Uzrok potkrepljen kodom i hipoteza korekcije:** polazni `src/app.ts` u commitu `0e6b1a7`, linija 57, koristio je `find(document => document.topic === request.topic)` i birao prvi dokument iste teme bez uslova za `state`. Arhivirani refund dokument je prvi u nizu. Trag sam ne objašnjava algoritam; tek povezivanje sa kodom objašnjava ovaj izbor. Kontrolisana modelska funkcija u `scripts/evidence.mjs` samo dodaje `Policy: ` tekstu izabranog dokumenta. Podaci zato podržavaju propust izbora izvora; nema osnova da ga pripišemo halucinaciji živog modela ili promptu. Hipoteza je bila da izbor aktivnog izvora iste teme, uz odbijanje kada takvog izvora nema, rešava refund i legacy. U tom trenutku efekat je tek trebalo dokazati testom i poređenjem.
 - **Kritika ocene:** `weakCheck: true` znači samo da odgovor nije prazan (`actual.text.length > 0`); ta provera ne meri važenje izvora, rok ni ispravnost citata. `recordedJudge.score: 0.95` sa obrazloženjem `Fluent and specific answer.` preuzet je iz javnog JSON-a prema tekstu odgovora. Poreklo `authored-synthetic-example-not-a-real-model-run` označava autorsku ilustraciju. Ispravan odgovor u istim podacima ima ilustrativnu ocenu 0.92. Ove ocene ne podržavaju naš kriterijum prihvatanja i nisu merenje pristrasnosti stvarnog modela; dokaz protiv prihvatanja su arhivirano stanje izvora, pogrešan rok i pali kriterijumi.
 
 Na vrhu izveštaja `runId` i `createdAt` identifikuju izvršavanje, `node` okruženje, a `git` commit i tadašnje stanje radne kopije. `source`, `built`, `data`, `scripts`, `tests` i `toolchain` sadrže otiske fajlova; `config` beleži postavke simulacije. U koraku 4 zabeležena je provera svih 11 otisaka prema tadašnjim fajlovima, uz podudaranje konfiguracije i refund traga sa `actual.trace`. Polje `trace` u rezultatu je relativna putanja do izdvojenog traga. Otisci identifikuju sadržaj, ali nisu dokaz ispravnosti niti zaštita od proizvoljnog menjanja svih dokaza.
@@ -101,7 +101,13 @@ Oba poređenja prikazuju `refund: FAIL -> PASS` i `legacy: FAIL -> PASS`. `shipp
 
 Svaki završni direktorijum sadrži `report.json`, `summary.md` i sve pripadajuće tragove; svih 11 izdvojenih tragova podudara se sa `actual.trace`. U svakom izveštaju provereno je svih 12 otisaka prema izvršenim fajlovima. Podaci, konfiguracija simulacije, skripte, alatni lanac i identiteti slučajeva isti su pre/posle; razlikuju se izmenjeni izvor, izvršivi build i prošireni skup testova. Oba završna merenja beleže commit `209f8519eb5e0c19e01ac84ec7f7bf303d96cdc1`, sa `git.dirty: true` zbog pripreme `LF` u radnoj kopiji i novog, nekomitovanog `.gitattributes`. Taj metapodatak nije prepravljan u izveštajima.
 
-Početni dokazi, `test-before.txt`, `test-after.txt` i dodatni test sačuvani su bez izmene. Dva nova direktorijuma ostaju ignorisana pravilom za `runs/`; tačne komande za ručno dodavanje nalaze se na kraju ovog README-a. Dodatna funkcionalna izmena aplikacije nije bila potrebna. Nema pogoršanja u izvršenom javnom skupu; 7/7 ne obuhvata nepoznat nalog niti meri pouzdanost živog modela. **Sledeći je korak 8: preporuka, ograničenja i priprema predaje; nije započet.**
+Početni dokazi, `test-before.txt`, `test-after.txt` i dodatni test sačuvani su bez izmene. Završna dva direktorijuma i `.gitattributes` sačuvani su u commitu `9c16b17` (`Step 7`); sva četiri izabrana direktorijuma sada su u Gitu uprkos opštem ignorisanju `runs/`. Dodatna funkcionalna izmena aplikacije nije bila potrebna. Nema pogoršanja u izvršenom javnom skupu; 7/7 ne obuhvata nepoznat nalog niti meri pouzdanost živog modela.
+
+**Korak 8 — preporuka i provera predaje završeni 3. novembra 2026.** [Beleška para](evidence-template.md#preporuka-i-ograničenja) procenjuje ceo izvezeni `answer`, sa policy i account zahtevima u sintetičkoj simulaciji. Preporuka je **ne izdati ceo servis**: iako je policy korekcija potvrđena, nepoznat nalog i dalje dobija `ok` i podrazumevani `active` u account grani. Javni 7/7 ne obuhvata taj rizik, a ograničenje izvezene funkcije na policy nije sprovedeno. Predlog signala za eventualnu odobrenu policy simulaciju, prag obustave, odgovorni član i uslov nastavka zapisani su u belešci; monitor nije implementiran.
+
+Provereno je Git praćenje svih 30 fajlova u četiri izabrana direktorijuma: svaki ima izveštaj, sažetak i potpune tragove. Oba završna izveštaja i dalje odgovaraju svim 12 sadašnjih otisaka merenih fajlova, a sačuvani test izlazi potvrđuju prvobitni pad/prolaz. Izvor, dodatni test i neizmenjeni javni ulazi odgovaraju ranije proveravanoj verziji; nova merenja nisu potrebna za ove dokumentacione dopune. U praćenoj predaji nema `node_modules/`, `dist/`, arhiva, `.env` fajlova, pristupnih podataka ili stvarnih korisničkih podataka; primeri i nalozi su sintetički.
+
+Milan je potvrdio da su oba člana lično proverila sve rezultate, kod i test. Doprinosi su uneti prema sadržaju commitova: Vedran je radio korake 1–4, a Milan 5–7 i završetak beleške; prikaz vodi Milan. Rok je **večeras, utorak 3. novembar 2026**; kanal je **mejl sa izveštajem i GitHub linkom**, prema Milanovoj potvrdi. Milan pravi završni dokumentacioni commit, push i šalje predaju. Tutorova nezavisna provera i incident tek slede; odgovarajuća dopuna iste beleške ostaje za sredu.
 
 Za nastavak u novom terminalu iz direktorijuma aplikacije, bez ponovnog generisanja dokaza:
 
@@ -131,7 +137,7 @@ Radimo naizmenično, ko kada stigne, bez unapred dodeljenih koraka i obaveznog i
 
 Pre nastavka pregledamo poslednje commitove i belešku. Po završetku celine pravimo jasan commit i ostavljamo kratak zapis šta je urađeno, gde su dokazi i šta je sledeće. Putanje dokaza čuvamo u belešci jer promenljive iz terminala nisu dostupne drugom članu; lokalni ignorisani dokazi moraju biti preneti dogovorenim kanalom ili eksplicitno dodati u Git.
 
-Na kraju doprinos svakog člana zapisujemo na osnovu sadržaja naših commitova i usmenog dogovora, uključujući pregled, analizu i lično proverene rezultate. Broj commitova sam po sebi ne predstavlja doprinos. Oboje treba da razumeju prihvaćenu korekciju; ko vodi završni prikaz dogovaramo naknadno.
+Doprinos svakog člana zapisan je na osnovu sadržaja commitova i Milanove potvrde o ličnim proverama obojice, uključujući analizu i pregled. Broj commitova sam po sebi ne predstavlja doprinos. Obojica su pregledala prihvaćenu korekciju; završni prikaz vodi Milan.
 
 | Korak | Okvirno vreme | Konkretan izlaz |
 | --- | --- | --- |
@@ -227,27 +233,27 @@ Očekuju se završni izlazni kodovi 0. `compare` mora porediti evaluate sa evalu
 
 U belešci objasnite zašto neprazan odgovor (`weakCheck`) i ilustrativna ocena 0.95 ne potvrđuju važeći izvor. `recordedJudge` je autorski sintetički primer, ne stvarno merenje LLM-a. Codex-ov predlog koda i testa nije nezavisni dokaz: uporedite očekivanja sa ugovorom, proverite stvarni pad/prolaz novog testa i neizmenjeni javni skup.
 
-Preporuku donesite iz ostvarenih rezultata. Poznati rizik nepoznatog naloga ostaje van obavezne korekcije i van javnih sedam slučajeva; 7/7 ne opravdava izdavanje celog servisa. Eventualno ograničenje na policy putanju mora biti stvarno sprovodivo. U suprotnom je „ne izdati” opravdana preporuka. Kontrolisana modelska zamena i mali skup ne dokazuju pouzdanost živog modela ili produkcije.
+Preporuka iz ostvarenih rezultata je **ne izdati ceo servis u simulaciju koja dozvoljava policy i account zahteve**. Poznati rizik nepoznatog naloga ostaje van korekcije i javnih sedam slučajeva; `status ?? "active"` u postojećoj account grani može nepostojeći nalog prikazati kao aktivan. CLI izlaže samo policy, ali izvezeni `answer` prima i account zahteve, pa napomena o ograničenoj upotrebi sama ne sprovodi granicu. Kontrolisana modelska zamena i mali skup ne dokazuju pouzdanost živog modela ili produkcije.
 
-Predlog signala za simulaciju: proveravati svaki policy citat prema sačuvanom korpusu važećem u trenutku odgovora. Jedan citat arhiviranog/nepostojećeg izvora pokreće obustavu policy simulacije; dogovoreni član para istražuje trag i verziju korpusa. Nastavak tek nakon otklanjanja uzroka i ponovljenih ciljnih i regresionih provera. Ovo je predlog procesa, bez implementacije infrastrukture.
+Predlog signala za eventualnu odobrenu policy simulaciju: član para koji pokreće run proverava svaki citat po ID-ju i reviziji iz traga prema verzionisanom korpusu važećem pri odgovoru, identifikovanom otiskom iz izveštaja. Jedan citat arhiviranog, nepostojećeg ili tematski pogrešnog izvora pokreće obustavu; taj član čuva trag i korpus i istražuje uzrok. Nastavak tek nakon otklanjanja uzroka i prolaza ciljnih i istih javnih evaluacionih/regresionih provera, uz validno poređenje. Ovo je predlog procesa, bez implementacije infrastrukture.
 
 ## Kontrolna lista predaje
 
 - [x] Izmenjeni `src/app.ts` i novi `tests/source-eligibility.test.mjs`.
 - [x] Početni i završni commit aplikacione korekcije: `4fde52c` i `209f851`; metapodaci merenja objašnjeni iznad.
-- [x] Četiri stvarna run direktorijuma: pre/posle za evaluate i regression, svaki sa izveštajem, sažetkom i tragovima; završna dva još treba ručno dodati u Git.
+- [x] Četiri stvarna run direktorijuma: pre/posle za evaluate i regression, svih 30 fajlova sa izveštajima, sažecima i tragovima već je u Gitu (`f6b48e1` i `9c16b17`).
 - [x] `test-before.txt` i `test-after.txt` za isti dodatni test.
-- [ ] Popunjen `evidence-template.md`, sa putanjama dokaza, tumačenjem, AI pomoći, doprinosom oba člana, preporukom i signalom.
-- [ ] Proveren sadržaj predaje: bez `node_modules/`, generisanog `dist/`, tajni i stvarnih korisničkih podataka.
+- [x] Popunjen `evidence-template.md` za korake 1–8, sa putanjama dokaza, tumačenjem, AI pomoći, doprinosom oba člana, preporukom i signalom; dopuna u sredu je budući odeljak.
+- [x] Proveren sadržaj predaje: bez `node_modules/`, generisanog `dist/`, tajni i stvarnih korisničkih podataka.
+- [x] Milan vodi prikaz; oba člana potvrdila su lični pregled. Rok i kanal navedeni su iznad, prema Milanovoj potvrdi.
 
-Ugnježdeni `.gitignore` i dalje isključuje `support-reliability-lab/runs/` i ZIP arhive. Početna dva direktorijuma već su u Gitu, sačuvana u commitu `f6b48e1`. Za ovaj korak ručno dodajte **samo dva nova direktorijuma**, zajedno sa svim njihovim fajlovima. Iz direktorijuma `week09`:
+Ugnježdeni `.gitignore` i dalje isključuje `support-reliability-lab/runs/` i ZIP arhive, ali sva četiri izabrana direktorijuma već su praćena: početni u `f6b48e1`, završni u `9c16b17`. U koraku 8 dopunjena je samo dokumentacija. Iz direktorijuma `week09` postojeće praćenje i sadržaj pripremljen za commit mogu se proveriti ovako:
 
 ```powershell
-git add -f -- support-reliability-lab/runs/evaluate-4042eff9-4b82-41ea-bb6f-e32e9072896b
-git add -f -- support-reliability-lab/runs/regression-5de5e837-6ca1-4dc4-aa81-1cdd30996e57
+git ls-files -- support-reliability-lab/runs
 git diff --cached --stat
 ```
 
-Ne dodavati druge lokalne run direktorijume. README, belešku i novi `.gitattributes` dodajte uobičajeno; commit i push pravi korisnik. Alternativno dokaze predajte zasebnim arhivom potvrđenim kanalom. Sam commit koda nije zamena za dokaze.
+Dokumentacione izmene dodajte uobičajeno. Pre slanja Milan pravi završni commit i push, proverava dostupnost [GitHub repozitorijuma](https://github.com/vekiii/week09) i prilaže [belešku para](evidence-template.md) kao izveštaj. Link je preuzet iz lokalnog Git `origin`. Ostali lokalni run-ovi nisu deo izabrane predaje; nema novih direktorijuma koje treba ručno dodati u ovom koraku.
 
-Pre predaje dogovorite ko ove nedelje vodi prikaz i potvrdite rok i kanal predaje u kursu; zadatak ne navodi konkretan termin. U sredu dopunite istu belešku tutorovom nezavisnom proverom, incidentom i revidiranom preporukom, bez obaveznog novog programiranja.
+Dogovorena predaja je večeras, u utorak 3. novembra 2026, mejlom sa izveštajem i GitHub linkom; potvrdu je dao Milan. U sredu dopunite istu belešku tutorovom nezavisnom proverom, incidentom i revidiranom preporukom, bez obaveznog novog programiranja. Ti nalazi još nisu dostupni i nisu predstavljeni kao završene provere.
