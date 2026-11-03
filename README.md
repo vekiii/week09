@@ -68,15 +68,31 @@ Posle korekcije očekuju se promenjeni izvor, build i skup testova, kao i novi I
 
 **Korak 5 — specifikacija završena 3. novembra 2026.** U odeljku [„Promena i hipoteza”](evidence-template.md#promena-i-hipoteza) precizirani su problem, pretpostavljeni uzrok, granica buduće izmene i kriterijumi prihvatanja: aktivan izvor iste teme, odbijanje bez poziva modelu kada takvog izvora nema i očuvanje postojećeg ispravnog ponašanja. Plan dodatne provere koristi sopstvenu temu `returns-window`, arhivirani dokument pre aktivnog i zaseban primer sa samo arhiviranim izvorom.
 
-U koraku 5 menjana je samo dokumentacija. Aplikacioni kod, postojeći testovi, javni podaci i sačuvani početni dokazi ostali su neizmenjeni; novi test, `test-before.txt` i `test-after.txt` još ne postoje. Nisu pokretana nova merenja niti je dokazan efekat korekcije. Pre implementacije oba člana treba da pregledaju specifikaciju i razumeju pravilo, očuvane tokove i plan provere. Sledeći je **korak 6: prvo dokaz pada dodatnog testa, pa minimalna korekcija**; u ovoj etapi nije započet.
+U koraku 5 menjana je samo dokumentacija, sačuvana u commitu `0e6b1a7` (`Step 5`). Na kraju tog koraka aplikacioni kod, postojeći testovi, javni podaci i početni dokazi bili su neizmenjeni; novi test i njegovi izlazi još nisu postojali. Specifikacija je prethodila implementaciji. Oba člana treba da razumeju pravilo, očuvane tokove i plan provere; Codex-ov zaključak ne zamenjuje lični pregled.
 
-Ponovna provera početnih dokaza u koraku 5 potvrđuje sačuvane rezultate 2/4 i 5/7 i podudaranje svih 11 izdvojenih tragova sa izveštajima. U ovoj Windows radnoj kopiji devet praćenih aplikacionih fajlova ima `CRLF`, dok početni otisci odgovaraju `LF`: direktno se podudaraju dva otiska iz `dist/`, a svih 11 nakon pretvaranja `CRLF` u `LF` isključivo u memoriji. Git ne beleži promenu njihovog sadržaja. Pre kasnijih merenja treba uskladiti završetke redova sa početnim `LF`, jer `compare` zahteva iste otiske javnih podataka i skripti. U ovom koraku ti fajlovi, evaluator i stari izveštaji nisu menjani.
+Ponovna provera početnih dokaza u koraku 5 potvrdila je sačuvane rezultate 2/4 i 5/7 i podudaranje svih 11 izdvojenih tragova sa izveštajima. Tada je devet praćenih aplikacionih fajlova u Windows radnoj kopiji imalo `CRLF`, dok su početni otisci odgovarali `LF`: direktno su se podudarala dva otiska iz `dist/`, a svih 11 nakon pretvaranja `CRLF` u `LF` isključivo u memoriji. Git nije beležio promenu njihovog sadržaja. Pre kasnijih javnih merenja treba uskladiti završetke redova sa početnim `LF`, jer `compare` zahteva iste otiske javnih podataka i skripti. U koraku 5 ti fajlovi, evaluator i stari izveštaji nisu menjani.
+
+**Korak 6 — dodatni test i minimalna korekcija završeni 3. novembra 2026.** Rad je nastavljen od čistog commita `0e6b1a7` (`Step 5`). Dodat je [source-eligibility.test.mjs](support-reliability-lab/tests/source-eligibility.test.mjs) sa dva slučaja koji pozivaju stvarni `answer` iz `../dist/app.js`, koriste sopstvene dokumente za temu `returns-window` i očekivanja izvedena iz ugovora. Test proverava status, tekst i tačan citat aktivnog izvora, njegov ID/reviziju u tragu i broj poziva modelu. Drugi slučaj zahteva odbijanje teme sa samo arhiviranim izvorom, iako postoji aktivan dokument druge teme.
+
+Provere su izvršene ovim redom iz direktorijuma aplikacije:
+
+| Provera | Stvarni rezultat |
+| --- | --- |
+| `npm.cmd run build` na neizmenjenom izvoru | Build uspešan; izlazni kod 0. |
+| `node --test --test-reporter=tap tests/source-eligibility.test.mjs` pre korekcije | 0/2 prolaza, oba pada zbog `ERR_ASSERTION`; izlazni kod 1; [test-before.txt](support-reliability-lab/test-before.txt). |
+| `npm.cmd run typecheck` posle korekcije | Provera tipova prošla; izlazni kod 0. |
+| `npm.cmd test` posle korekcije | Build uspešan; svih 5 testova prošlo (3 postojeća i 2 nova), bez preskočenih; izlazni kod 0. |
+| Ista dodatna test komanda posle korekcije | 2/2 prolaza; izlazni kod 0; [test-after.txt](support-reliability-lab/test-after.txt). |
+
+Prvi stvarni pad bio je tekst od 60 umesto 21 dana; drugi jedan modelski poziv umesto nule. Nakon sačuvanog pada, u `src/app.ts` dodat je samo uslov `document.state === "active"` uz postojeću proveru teme. Postojeća grana za nedostajući izvor sada odbija i temu sa samo arhiviranim dokumentima. Novi test nije menjan između pada i prolaza, što je provereno SHA-256 otiskom; ne zavisi od refund primera i posebno proverava citat, pa sama zamena teksta nije dovoljna.
+
+Pregledani su diff i ceo novi test. Postojeći testovi, javni podaci, konfiguracija, skripte, evaluator, account putanja i početni dokazi nisu menjani; `dist/` je nastao build-om. README i beleška ažurirani su zajedno sa kodom i testnim izlazima. Završni commit korekcije još treba da napravi korisnik. **Korak 7 nije započet:** nisu pokretani `evaluate`, `regression` ili `compare`, pa 4/4 i 7/7 još nisu potvrđeni. Usklađivanje završetaka redova za kontrolisano javno poređenje ostaje priprema za taj korak; u koraku 6 javni podaci i skripte nisu prepisivani.
 
 Za kontrolnu tačku pripreme oba člana treba da razumeju: uspešno pokretanje potvrđuje da se proces izvršio, prolaz tri osnovna testa potvrđuje samo njihove provere, dok se prihvatljivost odgovora proverava posebnim kriterijumima i evaluacijom. Tri prolaza nisu potvrda spremnosti za izdanje.
 
 ## Granica promene i hipoteza
 
-`answer()` trenutno bira prvi dokument iste teme pomoću `find`, bez provere `state`. U javnim podacima arhivirani `refund-old` prethodi aktivnom `refund-current`. Hipoteza je da izbor samo aktivnog dokumenta odgovarajuće teme rešava i pogrešan refund odgovor i neprihvatljiv legacy odgovor. To treba potvrditi tragovima i testovima pre prihvatanja izmene.
+Polazni `answer()` birao je prvi dokument iste teme pomoću `find`, bez provere `state`. U javnim podacima arhivirani `refund-old` prethodi aktivnom `refund-current`. U koraku 6 izbor je ograničen na aktivan dokument odgovarajuće teme. Dodatni test potvrđuje to pravilo i odbijanje bez modela na sopstvenim podacima; očekivani efekat na refund i legacy još treba potvrditi ponovljenim javnim merenjima i tragovima u koraku 7.
 
 Kriterijumi prihvatanja:
 
@@ -146,12 +162,12 @@ if (-not $preReg -or -not (Test-Path -LiteralPath "$preReg/report.json")) { thro
 
 Očekivani početni izlazni kod za oba merenja je 1, uz stvarne izveštaje. Otvorite `summary.md`, `report.json` i `traces/refund.json` iz `$preEval`. Trag ne sadrži stanje izvora: povežite ID i reviziju sa `data/lab.json`. Sačuvajte putanje u belešku; promenljive važe samo u tekućem terminalu.
 
-Posle dodavanja novog testa, a **pre korekcije aplikacije**:
+Naredne komande koraka 6 služe kao referenca postupka. Sačuvani `test-before.txt` i `test-after.txt` već postoje; ne prepisivati ih kasnijim pokretanjima. Posle dodavanja novog testa, a **pre korekcije aplikacije**, izvršeno je:
 
 ```powershell
 npm.cmd run build
 # Nastaviti samo ako je build uspešan.
-node --test tests/source-eligibility.test.mjs > test-before.txt 2>&1
+node --test --test-reporter=tap tests/source-eligibility.test.mjs > test-before.txt 2>&1
 Get-Content test-before.txt
 ```
 
@@ -160,7 +176,7 @@ Potvrdite da je test izvršen i pada zbog pogrešnog izvora/teksta/citata, a ne 
 ```powershell
 npm.cmd run typecheck
 npm.cmd test
-node --test tests/source-eligibility.test.mjs > test-after.txt 2>&1
+node --test --test-reporter=tap tests/source-eligibility.test.mjs > test-after.txt 2>&1
 Get-Content test-after.txt
 ```
 
@@ -195,10 +211,10 @@ Predlog signala za simulaciju: proveravati svaki policy citat prema sačuvanom k
 
 ## Kontrolna lista predaje
 
-- [ ] Izmenjeni `src/app.ts` i novi `tests/source-eligibility.test.mjs`.
+- [x] Izmenjeni `src/app.ts` i novi `tests/source-eligibility.test.mjs`.
 - [ ] Početni i završni commit, ili tačno objašnjenje nedostajućih metapodataka.
 - [ ] Četiri stvarna run direktorijuma: pre/posle za evaluate i regression, svaki sa izveštajem, sažetkom i tragovima.
-- [ ] `test-before.txt` i `test-after.txt` za isti dodatni test.
+- [x] `test-before.txt` i `test-after.txt` za isti dodatni test.
 - [ ] Popunjen `evidence-template.md`, sa putanjama dokaza, tumačenjem, AI pomoći, doprinosom oba člana, preporukom i signalom.
 - [ ] Proveren sadržaj predaje: bez `node_modules/`, generisanog `dist/`, tajni i stvarnih korisničkih podataka.
 
